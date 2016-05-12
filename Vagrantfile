@@ -58,24 +58,40 @@ $kube_provider_boxes = {
       # box
       :box_name => 'kube-fedora23',
       :box_url => 'https://opscode-vm-bento.s3.amazonaws.com/vagrant/parallels/opscode_fedora-23_chef-provisionerless.box'
+    },
+    'debian' => {
+      :box_name => 'kube-debian-jessie',
+      :box_url => 'http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_debian-8.4_chef-provisionerless.box'
     }
   },
   :virtualbox => {
     'fedora' => {
       :box_name => 'kube-fedora23',
       :box_url => 'https://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_fedora-23_chef-provisionerless.box'
+    },
+    'debian' => {
+      :box_name => 'kube-debian-jessie',
+      :box_url => 'http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_debian-8.4_chef-provisionerless.box'
     }
   },
   :libvirt => {
     'fedora' => {
       :box_name => 'kube-fedora23',
       :box_url => 'https://dl.fedoraproject.org/pub/fedora/linux/releases/23/Cloud/x86_64/Images/Fedora-Cloud-Base-Vagrant-23-20151030.x86_64.vagrant-libvirt.box'
+    },
+    'debian' => {
+      :box_name => 'kube-debian-jessie',
+      :box_url => 'http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_debian-8.4_chef-provisionerless.box'
     }
   },
   :vmware_desktop => {
     'fedora' => {
       :box_name => 'kube-fedora23',
       :box_url => 'https://opscode-vm-bento.s3.amazonaws.com/vagrant/vmware/opscode_fedora-23_chef-provisionerless.box'
+    },
+    'debian' => {
+      :box_name => 'kube-debian-jessie',
+      :box_url => 'http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_debian-8.4_chef-provisionerless.box'
     }
   }
 }

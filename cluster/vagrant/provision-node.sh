@@ -22,17 +22,11 @@ set -o pipefail
 # See: https://github.com/mitchellh/vagrant/issues/2430
 hostnamectl set-hostname ${NODE_NAME}
 
-if [[ "$(grep 'VERSION_ID' /etc/os-release)" =~ ^VERSION_ID=23 ]]; then
-  # Disable network interface being managed by Network Manager (needed for Fedora 21+)
-  NETWORK_CONF_PATH=/etc/sysconfig/network-scripts/
-  if_to_edit=$( find ${NETWORK_CONF_PATH}ifcfg-* | xargs grep -l VAGRANT-BEGIN )
-  for if_conf in ${if_to_edit}; do
-    grep -q ^NM_CONTROLLED= ${if_conf} || echo 'NM_CONTROLLED=no' >> ${if_conf}
-    sed -i 's/#^NM_CONTROLLED=.*/NM_CONTROLLED=no/' ${if_conf}
-  done;
-  systemctl restart network
-fi
+# install libapparmor1
+apt-get install -y libapparmor1
 
+NETWORK_CONF_PATH=/etc/network/interfaces
+if_to_edit=$( find ${NETWORK_CONF_PATH} | xargs grep -l VAGRANT-BEGIN )
 NETWORK_IF_NAME=`echo ${if_to_edit} | awk -F- '{ print $3 }'`
 
 # Setup hosts file to support ping by hostname to master

@@ -24,16 +24,42 @@ function provision-network-node {
   # Install flannel for overlay
   if ! which flanneld >/dev/null 2>&1; then
 
-    dnf install -y flannel
+    curl -sL https://github.com/coreos/flannel/releases/download/v0.5.5/flannel-0.5.5-linux-amd64.tar.gz -o flannel-0.5.5-linux-amd64.tar.gz
+    tar xzf flannel-0.5.5-linux-amd64.tar.gz
+    mv flannel-0.5.5/flanneld /usr/bin
+    mv flannel-0.5.5/mk-docker-opts.sh /usr/bin
+    rm -rf flannel-0.5.5-linux-amd64.tar.gz flannel-0.5.5
 
     # Configure local daemon to speak to master
-    NETWORK_CONF_PATH=/etc/sysconfig/network-scripts/
-    if_to_edit=$( find ${NETWORK_CONF_PATH}ifcfg-* | xargs grep -l VAGRANT-BEGIN )
+    NETWORK_CONF_PATH=/etc/network/interfaces
+    if_to_edit=$( find ${NETWORK_CONF_PATH} | xargs grep -l VAGRANT-BEGIN )
     NETWORK_IF_NAME=`echo ${if_to_edit} | awk -F- '{ print $3 }'`
-    cat <<EOF >/etc/sysconfig/flanneld
+    cat <<EOF >/etc/default/flanneld
 FLANNEL_ETCD="${FLANNEL_ETCD_URL}"
 FLANNEL_ETCD_KEY="/coreos.com/network"
 FLANNEL_OPTIONS="-iface=${NETWORK_IF_NAME} --ip-masq"
+EOF
+
+    cat <<EOF >/lib/systemd/system/flanneld.service
+[Unit]
+Description=Flanneld overlay address etcd agent
+After=network.target
+After=network-online.target
+Wants=network-online.target
+After=etcd.service
+Before=docker.service
+
+[Service]
+Type=notify
+EnvironmentFile=/etc/default/flanneld
+EnvironmentFile=-/etc/default/docker-network
+ExecStart=/usr/bin/flanneld -etcd-endpoints=\${FLANNEL_ETCD} -etcd-prefix=\${FLANNEL_ETCD_KEY} \$FLANNEL_OPTIONS
+ExecStartPost=/usr/bin/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/docker
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=docker.service
 EOF
 
     # Start flannel

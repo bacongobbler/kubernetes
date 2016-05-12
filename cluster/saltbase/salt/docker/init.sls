@@ -263,10 +263,11 @@ net.ipv4.ip_forward:
 {% set override_deb_sha1='a505fd49372cf836f5b9ed953053c50b3381dbfd' %}
 
 {% else %}
-{% set docker_pkg_name='lxc-docker-1.7.1' %}
-{% set override_docker_ver='1.7.1' %}
-{% set override_deb='lxc-docker-1.7.1_1.7.1_amd64.deb' %}
-{% set override_deb_sha1='81abef31dd2c616883a61f85bfb294d743b1c889' %}
+{% set docker_pkg_name='docker-engine' %}
+{% set override_docker_ver='1.10.3-0~jessie' %}
+{% set override_deb='docker-engine_1.10.3-0~jessie_amd64.deb' %}
+{% set override_deb_url='http://apt.dockerproject.org/repo/pool/main/d/docker-engine/docker-engine_1.10.3-0~jessie_amd64.deb' %}
+{% set override_deb_sha1='d36087ff2ff13d6a9a1761855ec5fffa45d10d1b' %}
 {% endif %}
 
 {% if override_deb_url == '' %}

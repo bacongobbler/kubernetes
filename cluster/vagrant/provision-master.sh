@@ -22,17 +22,8 @@ set -o pipefail
 # See: https://github.com/mitchellh/vagrant/issues/2430
 hostnamectl set-hostname ${MASTER_NAME}
 
-if [[ "$(grep 'VERSION_ID' /etc/os-release)" =~ ^VERSION_ID=23 ]]; then
-  # Disable network interface being managed by Network Manager (needed for Fedora 21+)
-  NETWORK_CONF_PATH=/etc/sysconfig/network-scripts/
-  if_to_edit=$( find ${NETWORK_CONF_PATH}ifcfg-* | xargs grep -l VAGRANT-BEGIN )
-  for if_conf in ${if_to_edit}; do
-    grep -q ^NM_CONTROLLED= ${if_conf} || echo 'NM_CONTROLLED=no' >> ${if_conf}
-    sed -i 's/#^NM_CONTROLLED=.*/NM_CONTROLLED=no/' ${if_conf}
-  done;
-  systemctl restart network
-fi
-
+NETWORK_CONF_PATH=/etc/network/interfaces
+if_to_edit=$( find ${NETWORK_CONF_PATH} | xargs grep -l VAGRANT-BEGIN )
 NETWORK_IF_NAME=`echo ${if_to_edit} | awk -F- '{ print $3 }'`
 
 function release_not_found() {
@@ -102,19 +93,6 @@ if [ ! -e "${BASIC_AUTH_FILE}" ]; then
   mkdir -p /srv/salt-overlay/salt/kube-apiserver
   (umask 077;
     echo "${MASTER_PASSWD},${MASTER_USER},admin" > "${BASIC_AUTH_FILE}")
-fi
-
-# Enable Fedora Cockpit on host to support Kubernetes administration
-# Access it by going to <master-ip>:9090 and login as vagrant/vagrant
-if ! which /usr/libexec/cockpit-ws &>/dev/null; then
-
-  pushd /etc/yum.repos.d
-    curl -OL https://copr.fedorainfracloud.org/coprs/g/cockpit/cockpit-preview/repo/fedora-23/msuchy-cockpit-preview-fedora-23.repo
-    dnf install -y cockpit cockpit-kubernetes
-  popd
-
-  systemctl enable cockpit.socket
-  systemctl start cockpit.socket
 fi
 
 install-salt
