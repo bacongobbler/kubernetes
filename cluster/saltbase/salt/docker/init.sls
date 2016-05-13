@@ -20,16 +20,34 @@ bridge-utils:
 
 {% if (grains.os == 'Fedora' and grains.osrelease_info[0] >= 22) or (grains.os == 'CentOS' and grains.osrelease_info[0] >= 7) %}
 
+/etc/yum.repos.d/docker.repo:
+  file.managed:
+    - source: salt://docker/docker.repo
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 644
+
+docker-engine:
+  pkg:
+    - name: docker-engine
+    - installed
+    - version: 1.9.1
+    - require:
+      - file: /etc/yum.repos.d/docker.repo
+      - pkg: docker
+    - install_flags: '--allowerasing'
+
 docker:
   pkg:
-    - installed
+    - removed
   service.running:
     - enable: True
     - require:
-      - pkg: docker
+      - pkg: docker-engine
     - watch:
       - file: {{ environment_file }}
-      - pkg: docker
+      - pkg: docker-engine
 
 {% else %}
 
